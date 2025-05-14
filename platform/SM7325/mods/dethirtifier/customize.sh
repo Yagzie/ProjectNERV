@@ -1,0 +1,40 @@
+BLOBS_LIST=(
+"/vendor/lib/libFrucSSMLib.so"
+"/vendor/lib/libQSEEComAPI.so"
+"/vendor/lib/libapex_cmn.so"
+"/vendor/lib/libapex_utils.so"
+"/vendor/lib/libavservices_minijail.so"
+"/vendor/lib/libcodec2_hidl@1.0.so"
+"/vendor/lib/libcodec2_vndk.so"
+"/vendor/lib/libcodecsolutionhelper_vendor.so"
+"/vendor/lib/libcpion.so"
+"/vendor/lib/libdisplayconfig.qti.so"
+"/vendor/lib/libhidltransport.so"
+"/vendor/lib/libhwbinder.so"
+"/vendor/lib/libminkdescriptor.so"
+"/vendor/lib/libminksocket.so"
+"/vendor/lib/liboemcrypto.so"
+"/vendor/lib/libpredeflicker_native.so"
+"/vendor/lib/libprotobuf-cpp-lite-3.9.1.so"
+"/vendor/lib/libqcbor.so"
+"/vendor/lib/libqrtr.so"
+"/vendor/lib/libsavscmn.so"
+"/vendor/lib/libsecnativefeature.so"
+"/vendor/lib/libstagefright_bufferpool@2.0.1.so"
+"/vendor/lib/libstagefright_bufferqueue_helper_vendor.so"
+"/vendor/lib/libstagefright_foundation_vendor.so"
+"/vendor/lib/libstagefright_omx_vendor.so"
+"/vendor/lib/libtrustedapploader.so"
+"/vendor/lib/libwvhidl.so"
+"/vendor/lib/vendor.display.config@2.0.so"
+"/vendor/lib/vendor.samsung.hardware.bluetooth.a2dp@1.0.so"
+"/vendor/lib/vintf-codecsolution-V2-ndk_platform.so"
+"/vendor/lib/vndk/libstagefright_omx_utils.so"
+"/vendor/lib/vndk/libstagefright_xmlparser.so"
+)
+
+find "$WORK_DIR/vendor/lib/" -type f -print0 | while IFS= read -r -d '' blob; do
+    if ! printf '%s\0' "${BLOBS_LIST[@]}" | grep -qFxzm 1 "${blob#$WORK_DIR}"; then
+        DELETE_FROM_WORK_DIR "vendor" "${blob#$WORK_DIR/vendor/}"
+    fi
+done
