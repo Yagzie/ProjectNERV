@@ -1,4 +1,4 @@
 id=dethirtifier
 name=Dethirtifier
 author=frax3r
-description=Nuke unused* blobs from vendor.
+description=Nuke unused 32 bit blobs from vendor and system.
