@@ -1,0 +1,4 @@
+id=dethirtifier
+name=Dethirtifier
+author=frax3r
+description=Nuke unused 32 bit blobs from vendor and system.
