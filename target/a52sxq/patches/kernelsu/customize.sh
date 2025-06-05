@@ -1,21 +1,40 @@
+SKIPUNZIP=1
+
 # [
-REPO="https://github.com/saadelasfur/android_kernel_samsung_sm7325/releases/download/v1.0.6/KSU-Next_v1.0.6-20250405_a52sxq_OneUI.zip"
-KERNELSU_MANAGER_APK="https://github.com/KernelSU-Next/KernelSU-Next/releases/download/v1.0.6/KernelSU_Next_v1.0.6_12490-release.apk"
+KERNELSU_ZIP="https://github.com/saadelasfur/android_kernel_samsung_sm7325/releases/download/20250605/KSU_v1.0.5-20250605_a52sxq_OneUI.zip"
+KERNELSU_MANAGER_APK="https://github.com/tiann/KernelSU/releases/download/v1.0.5/KernelSU_v1.0.5_12081-release.apk"
 
 REPLACE_KERNEL_BINARIES()
 {
     [ -d "$TMP_DIR" ] && rm -rf "$TMP_DIR"
     mkdir -p "$TMP_DIR"
 
-    ZIP_LINK="$REPO"
-    echo "Downloading $(basename "$ZIP_LINK")"
-    curl -L -s -o "$TMP_DIR/krnl.zip" "$ZIP_LINK"
+    echo "Downloading $(basename "$KERNELSU_ZIP")"
+    curl -L -s -o "$TMP_DIR/ksu.zip" "$KERNELSU_ZIP"
 
     echo "Extracting kernel binaries"
     rm -f "$WORK_DIR/kernel/"*.img
-    unzip -q -j "$TMP_DIR/krnl.zip" \
+    unzip -q -j "$TMP_DIR/ksu.zip" \
         "mesa/boot.img" "mesa/dtbo.img" "mesa/vendor_boot.img" \
         -d "$WORK_DIR/kernel"
+
+    echo "Extracting kernel modules"
+    rm -f "$WORK_DIR/vendor/bin/vendor_modprobe.sh"
+    DELETE_FROM_WORK_DIR "vendor" "lib/modules/5.4-gki"
+    rm -rf "$WORK_DIR/vendor/lib/modules/"*
+    unzip -q -j "$TMP_DIR/ksu.zip" \
+        "vendor/bin/vendor_modprobe.sh" -d "$WORK_DIR/vendor/bin"
+    unzip -q -j "$TMP_DIR/ksu.zip" \
+        "vendor/lib/modules/*" -d "$WORK_DIR/vendor/lib/modules"
+
+    sed -i "/qca_cld3_/d" "$WORK_DIR/configs/file_context-vendor"
+    sed -i "/qca_cld3_/d" "$WORK_DIR/configs/fs_config-vendor"
+    if ! grep -q "wlan\.ko" "$WORK_DIR/configs/file_context-vendor"; then
+        echo "/vendor/lib/modules/wlan\.ko u:object_r:vendor_file:s0" >> "$WORK_DIR/configs/file_context-vendor"
+    fi
+    if ! grep -q "wlan.ko" "$WORK_DIR/configs/fs_config-vendor"; then
+        echo "vendor/lib/modules/wlan.ko 0 0 644 capabilities=0x0" >> "$WORK_DIR/configs/fs_config-vendor"
+    fi
 
     rm -rf "$TMP_DIR"
 }
@@ -23,9 +42,9 @@ REPLACE_KERNEL_BINARIES()
 ADD_MANAGER_APK_TO_PRELOAD()
 {
     # https://github.com/tiann/KernelSU/issues/886
-    local APK_PATH="system/preload/KernelSU-Next/com.rifsxd.ksunext-mesa==/base.apk"
+    local APK_PATH="system/preload/KernelSU/me.weishu.kernelsu-mesa==/base.apk"
 
-    echo "Adding KernelSU-Next.apk to preload apps"
+    echo "Adding KernelSU.apk to preload apps"
     mkdir -p "$WORK_DIR/system/$(dirname "$APK_PATH")"
     curl -L -s -o "$WORK_DIR/system/$APK_PATH" -z "$WORK_DIR/system/$APK_PATH" "$KERNELSU_MANAGER_APK"
 
