@@ -1,0 +1,4 @@
+id=kernelsu
+name=KernelSU support
+author=salvogiangri
+description=Adds KernelSU support in ROM.
